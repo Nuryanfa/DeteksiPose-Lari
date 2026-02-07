@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose Athlete Analyzer (Pro)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-person-running"></i>
+                <h1>Pose Athlete Analyzer</h1>
+            </div>
+            <div class="header-right">
+                <div class="accuracy-control">
+                    <label>Accuracy:</label>
+                    <select id="accuracySelect">
+                        <option value="0">Fast (Lite)</option>
+                        <option value="1">Balanced (Full)</option>
+                        <option value="2" selected>High (Heavy)</option>
+                    </select>
+                </div>
+                <div class="status-pill">
+                    <span class="dot"></span> System Active
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard">
+            <!-- Video Section -->
+            <section class="video-panel">
+                <div class="video-container">
+                    <img src="{{ url_for('video_feed') }}" alt="Live Feed" id="videoFeed">
+                    <div class="overlay-controls">
+                        <div class="playback-controls">
+                             <button id="pauseBtn" class="btn-icon" title="Pause"><i class="fa-solid fa-pause"></i></button>
+                             <button id="resumeBtn" class="btn-icon" title="Resume" style="display:none;"><i class="fa-solid fa-play"></i></button>
+                             <button id="replayBtn" class="btn-icon" title="Replay"><i class="fa-solid fa-rotate-left"></i></button>
+                        </div>
+                        <button id="resetBtn" class="btn-icon" title="Reset Metrics"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Input Tabs -->
+                <div class="input-tabs">
+                    <button class="tab-btn active" data-tab="video-tab">
+                        <i class="fa-solid fa-file-video"></i> Video / Cam
+                    </button>
+                    <button class="tab-btn" data-tab="photo-tab">
+                        <i class="fa-solid fa-image"></i> Photo
+                    </button>
+                    <button class="tab-btn" data-tab="youtube-tab">
+                        <i class="fa-brands fa-youtube"></i> YouTube
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="controls">
+                    <!-- Video/Cam Tab -->
+                    <div id="video-tab" class="tab-content active">
+                        <div class="control-group">
+                            <div class="file-input-wrapper">
+                                <button class="btn-primary">
+                                    <i class="fa-solid fa-upload"></i> Upload Video
+                                </button>
+                                <input type="file" id="videoUpload" accept="video/*">
+                            </div>
+                            
+                            <div class="cam-input-group" style="display: flex; gap: 5px; align-items: center;">
+                                <input type="text" id="camSource" placeholder="ID (0,1) or URL" style="width: 120px; padding: 8px; border-radius: 5px; border: none;">
+                                <button class="btn-secondary" id="camBtn">
+                                    <i class="fa-solid fa-camera"></i> Connect
+                                </button>
+                            </div>
+
+                            <span id="videoFileName" class="file-label">No file</span>
+                        </div>
+                    </div>
+
+                    <!-- Photo Tab -->
+                    <div id="photo-tab" class="tab-content">
+                         <div class="control-group">
+                            <div class="file-input-wrapper">
+                                <button class="btn-primary">
+                                    <i class="fa-solid fa-upload"></i> Upload Photo
+                                </button>
+                                <input type="file" id="imageUpload" accept="image/*">
+                            </div>
+                            <span id="imageFileName" class="file-label">No file</span>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Tab -->
+                    <div id="youtube-tab" class="tab-content">
+                        <div class="youtube-group">
+                            <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL here...">
+                            <button class="btn-primary" id="youtubeBtn">
+                                <i class="fa-solid fa-play"></i> Load
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metrics Panel -->
+            <section class="metrics-panel">
+                <div class="metric-card highlight">
+                    <div class="card-icon"><i class="fa-solid fa-shoe-prints"></i></div>
+                    <h3>Step Count</h3>
+                    <p class="value" id="stepCount">0</p>
+                    <span class="unit">steps</span>
+                </div>
+
+                <div class="metric-card">
+                    <div class="card-icon"><i class="fa-solid fa-stopwatch"></i></div>
+                    <h3>Cadence</h3>
+                    <p class="value" id="cadence">0.0</p>
+                    <span class="unit">spm</span>
+                </div>
+
+                <div class="metric-card symmetry-card">
+                    <h3>Symmetry Test</h3>
+                    <div class="symmetry-bar-container">
+                        <div class="symmetry-label">
+                            <span>Left</span>
+                            <span id="symL">50%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="symBar" style="width: 50%;"></div>
+                        </div>
+                        <div class="symmetry-label right">
+                            <span id="symR">50%</span>
+                            <span>Right</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card info-card">
+                    <h3>Joint Angles</h3>
+                    <ul class="angle-list">
+                        <li>
+                            <span>Knee Flexio (R)</span>
+                            <span class="angle-val" id="angleR">--°</span>
+                        </li>
+                        <li>
+                            <span>Knee Flexio (L)</span>
+                            <span class="angle-val" id="angleL">--°</span>
+                        </li>
+                        <li>
+                            <span>Elbow Flexio (R)</span>
+                            <span class="angle-val" id="elbowR">--°</span>
+                        </li>
+                        <li>
+                            <span>Elbow Flexio (L)</span>
+                            <span class="angle-val" id="elbowL">--°</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
